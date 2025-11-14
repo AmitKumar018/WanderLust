@@ -1,0 +1,27 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- <h3 class="mt-4">Search results for: "<%= q %>"</h3> -->
+
+<div class="row mt-4">
+    <% if (results.length === 0) { %>
+        <h5 class="text-muted">No listings found. Try another search.</h5>
+    <% } %>
+
+    <% results.forEach(listing => { %>
+        <div class="col-md-4 mb-4">
+            <a href="/listings/<%= listing._id %>" class="listing-link">
+                <div class="card listing-card">
+                    <img src="<%= listing.image.url %>"
+                         class="card-img-top"
+                         style="height:20rem;"
+                         alt="">
+                    <div class="card-body">
+                        <h5><%= listing.title %></h5>
+                        <p>₹<%= listing.price %> / night</p>
+                        <p><%= listing.location %>, <%= listing.country %></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    <% }) %>
+</div>

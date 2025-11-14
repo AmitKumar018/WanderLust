@@ -22,41 +22,54 @@
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-      data-bs-target="#navbarNavAltMarkup"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-          <a class="nav-link" href="/listings">Explore</a>   
-        </div>
+  <div class="container-fluid">
+    
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-solid fa-compass"></i>
+    </a>
 
+    <button class="navbar-toggler" type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarNavAltMarkup">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <div class="navbar-nav ms-auto">
-          <form class="d-flex" role="search">
-            <input type="search" 
-            class="form-control me-2 search-inp" 
-            placeholder="Search destinations" 
-           
-            >
-            <button class="btn search-btn d-flex align-items-center" type="submit">
-            <i class="fa-solid fa-magnifying-glass me-2"></i> Search
-            </button>
-          </form>
-        </div>
-        <div class="navbar-nav ms-auto">
-          <a class="nav-link" href="/listings/new">WanderLust your home</a>
-          <% if(!currUser){ %>
-          <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-          <a class="nav-link" href="/login"><b>Log in</b></a>
-          <% } %>
-          <% if(currUser){ %>
-          <a class="nav-link" href="/logout">logout</a>
-          <% } %>
-        </div>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings"><button type="button" class="btn btn-primary">All Listings</button></a>   
       </div>
+
+      <!-- SEARCH BAR -->
+      <div class="navbar-nav ms-auto">
+        <form class="d-flex" action="/listings/search/results" method="GET">
+
+          <input 
+            type="search" 
+            name="q"
+            class="form-control me-2 search-inp" 
+            placeholder="Search destinations"
+            required
+          >
+          <button class="btn search-btn d-flex align-items-center" type="submit">
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+            Search
+          </button>
+        </form>
+      </div>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/listings/new"><button type="button" class="btn btn-success">Create</button></a>
+
+        <% if(!currUser){ %>
+          <a class="nav-link" href="/signup"><b><button type="button" class="btn btn-primary">Sign Up</button></b></a>
+          <a class="nav-link" href="/login"><b><button type="button" class="btn btn-primary">Log In</button></b></a>
+        <% } %>
+
+        <% if(currUser){ %>
+          <a class="nav-link" href="/logout"><button type="button" class="btn btn-light">Logout</button></a>
+        <% } %>
+      </div>
+
     </div>
-  </nav>
+  </div>
+</nav>

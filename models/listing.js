@@ -34,9 +34,18 @@ const listingSchema = new mongoose.Schema({
       type: [Number],
       required: true
     }
-  }
+  },
 });
 
+// search index
+listingSchema.index({
+  title: 'text',
+  description: 'text',
+  location: 'text',
+  country: 'text'
+});
+
+// delete all review when listing deleted
 listingSchema.post("findOneAndDelete", async(listing)=>{
   if(listing){
   await Review.deleteMany({_id : {$in: listing.reviews}})
