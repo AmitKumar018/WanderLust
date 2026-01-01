@@ -4,7 +4,7 @@ const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 const ExpressError = require("../utils/ExpressError");
 
-// ---------------- PAGINATION APPLIED HERE ----------------
+//  PAGINATION APPLIED HERE 
 module.exports.index = async (req, res) => {
   let page = parseInt(req.query.page) || 1;
   let limit = 6;  // listings per page
@@ -23,7 +23,7 @@ module.exports.index = async (req, res) => {
     totalPages 
   });
 };
-// ----------------------------------------------------------
+
 
 
 // New Route

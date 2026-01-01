@@ -2,7 +2,6 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -14,7 +13,7 @@ const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const session = require("express-session");
-const MongoStore = require('connect-mongo');
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -45,17 +44,17 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // mongo session store
-const store =MongoStore.create({
-  mongoUrl:dbUrl,
-  crypto:{
-    secret:process.env.SECRET,
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: process.env.SECRET,
   },
-  touchAfter:24*3600,
-})
+  touchAfter: 24 * 3600,
+});
 
-store.on("error",()=>{
-  console.log("Error in Mongo Session Store",err);
-})
+store.on("error", () => {
+  console.log("Error in Mongo Session Store", err);
+});
 // Session
 const sessionOptions = {
   store,
@@ -68,7 +67,6 @@ const sessionOptions = {
     httpOnly: true,
   },
 };
-
 
 app.use(session(sessionOptions));
 app.use(flash());
