@@ -1,0 +1,40 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="dashboard-header">
+  <div>
+    <p class="eyebrow">Wishlist</p>
+    <h1>Saved stays</h1>
+  </div>
+</section>
+
+<% if(savedListings.length){ %>
+  <section class="listing-grid">
+    <% savedListings.forEach((listing) => { %>
+      <% const primaryImage = listing.images && listing.images.length ? listing.images[0] : listing.image; %>
+      <article class="listing-tile">
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+          <div class="listing-image-wrap">
+            <img src="<%= primaryImage && primaryImage.url ? primaryImage.url : 'https://via.placeholder.com/800x600?text=No+Image' %>" alt="<%= listing.title %>">
+          </div>
+          <div class="listing-meta">
+            <div>
+              <h2><%= listing.title %></h2>
+              <p><%= listing.location %>, <%= listing.country %></p>
+            </div>
+          </div>
+          <p class="price-line">Rs. <%= listing.price.toLocaleString("en-IN") %> night</p>
+        </a>
+        <form action="/listings/<%= listing._id %>/save?_method=DELETE" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-sm btn-light" type="submit">Remove</button>
+        </form>
+      </article>
+    <% }) %>
+  </section>
+<% } else { %>
+  <section class="empty-state">
+    <p class="eyebrow">Nothing saved</p>
+    <h2>Save listings you want to compare later.</h2>
+    <a class="btn btn-brand" href="/listings">Explore stays</a>
+  </section>
+<% } %>

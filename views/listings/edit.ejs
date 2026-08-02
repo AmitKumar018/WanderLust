@@ -1,0 +1,94 @@
+<% layout("/layouts/boilerplate") %>
+<% const selectedAmenities = listing.amenities || []; %>
+
+<section class="form-page">
+  <div class="form-heading">
+    <p class="eyebrow">Host tools</p>
+    <h1>Edit listing</h1>
+  </div>
+
+  <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" class="needs-validation listing-form" novalidate enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="form-section">
+      <h2>Basics</h2>
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input id="title" type="text" name="listing[title]" value="<%= listing.title %>" class="form-control" required maxlength="120">
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea id="description" name="listing[description]" rows="5" class="form-control" required maxlength="2000"><%= listing.description %></textarea>
+      </div>
+      <div class="current-gallery">
+        <% const currentImages = listing.images && listing.images.length ? listing.images : [listing.image]; %>
+        <% currentImages.filter(Boolean).forEach((image) => { %>
+          <img src="<%= image.url %>" alt="<%= listing.title %> photo">
+        <% }) %>
+      </div>
+      <div class="mt-3">
+        <label for="images" class="form-label">Replace photos</label>
+        <input id="images" name="listing[images]" type="file" class="form-control" accept="image/png,image/jpeg,image/webp" multiple>
+        <div class="form-text">Leave empty to keep current photos.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Details</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="price" class="form-label">Nightly price</label>
+          <input id="price" name="listing[price]" value="<%= listing.price %>" type="number" min="0" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label for="bedrooms" class="form-label">Bedrooms</label>
+          <input id="bedrooms" name="listing[bedrooms]" value="<%= listing.bedrooms %>" type="number" min="0" max="30" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label for="bathrooms" class="form-label">Baths</label>
+          <input id="bathrooms" name="listing[bathrooms]" value="<%= listing.bathrooms %>" type="number" min="0" max="30" class="form-control" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Location and style</h2>
+      <div class="row g-3">
+        <div class="col-md-7">
+          <label for="location" class="form-label">Location</label>
+          <input id="location" name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required>
+        </div>
+        <div class="col-md-5">
+          <label for="country" class="form-label">Country</label>
+          <input id="country" name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label for="category" class="form-label">Category</label>
+          <select id="category" name="listing[category]" class="form-select" required>
+            <% categories.forEach((category) => { %>
+              <option value="<%= category.value %>" <%= listing.category === category.value ? 'selected' : '' %>><%= category.label %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Amenities and rules</h2>
+      <div class="amenity-grid">
+        <% amenities.forEach((amenity) => { %>
+          <label class="form-check amenity-check">
+            <input class="form-check-input" type="checkbox" name="listing[amenities]" value="<%= amenity %>" <%= selectedAmenities.includes(amenity) ? 'checked' : '' %>>
+            <span><%= amenity %></span>
+          </label>
+        <% }) %>
+      </div>
+      <div class="mt-3">
+        <label for="houseRules" class="form-label">House rules</label>
+        <textarea id="houseRules" name="listing[houseRules]" rows="3" class="form-control" maxlength="1200"><%= listing.houseRules %></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-brand btn-lg" type="submit">Save changes</button>
+  </form>
+</section>

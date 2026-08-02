@@ -1,0 +1,216 @@
+<% layout("/layouts/boilerplate") %>
+<% const currentUser = typeof currUser === "undefined" ? null : currUser; %>
+<% const images = listing.images && listing.images.length ? listing.images : [listing.image].filter(Boolean); %>
+<%
+  const sameId = (left, right) => left && right && left.toString() === right.toString();
+  const ownerId = listing.owner && (listing.owner._id || listing.owner);
+  const isOwner = currentUser && sameId(ownerId, currentUser._id);
+  const mapCoordinates =
+    listing.geometry && Array.isArray(listing.geometry.coordinates)
+      ? listing.geometry.coordinates
+      : [];
+%>
+
+<article class="show-page">
+  <header class="show-header">
+    <div>
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <% if(listing.isGuestFavorite){ %>
+          <span class="badge text-bg-light favorite-badge">Guest favorite</span>
+        <% } %>
+        <% if(!listing.isActive){ %>
+          <span class="badge text-bg-warning">Inactive</span>
+        <% } %>
+      </div>
+      <h1><%= listing.title %></h1>
+      <p><%= listing.location %>, <%= listing.country %></p>
+    </div>
+
+    <div class="show-actions">
+      <% if(currentUser && !isOwner){ %>
+        <% if(isSaved){ %>
+          <form action="/listings/<%= listing._id %>/save?_method=DELETE" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-light" type="submit"><i class="fa-solid fa-heart"></i> Saved</button>
+          </form>
+        <% } else { %>
+          <form action="/listings/<%= listing._id %>/save" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-light" type="submit"><i class="fa-regular fa-heart"></i> Save</button>
+          </form>
+        <% } %>
+      <% } %>
+      <% if(isOwner){ %>
+        <a class="btn btn-dark" href="/listings/<%= listing._id %>/edit">Edit</a>
+        <form action="/listings/<%= listing._id %>/status?_method=PATCH" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-outline-dark" type="submit"><%= listing.isActive ? "Deactivate" : "Activate" %></button>
+        </form>
+      <% } %>
+    </div>
+  </header>
+
+  <section class="gallery-grid <%= images.length === 1 ? 'single-image' : images.length < 5 ? 'balanced-gallery' : '' %>">
+    <% images.slice(0, 5).forEach((image, index) => { %>
+      <img class="<%= index === 0 ? 'gallery-cover' : '' %>" src="<%= image.url %>" alt="<%= listing.title %> photo <%= index + 1 %>">
+    <% }) %>
+  </section>
+
+  <section class="show-layout">
+    <div class="show-main">
+      <section class="detail-block overview-block">
+        <div class="host-row">
+          <div>
+            <% if(listing.owner && listing.owner.username){ %>
+              <h2>Hosted by <a href="/users/<%= ownerId %>"><%= listing.owner.username %></a></h2>
+            <% } else { %>
+              <h2>Hosted by WanderLust host</h2>
+            <% } %>
+            <p><%= listing.bedrooms %> bedrooms · <%= listing.bathrooms %> baths</p>
+          </div>
+          <div class="rating-large">
+            <i class="fa-solid fa-star"></i>
+            <span><%= listing.averageRating ? listing.averageRating.toFixed(1) : "New" %></span>
+            <small><%= listing.reviewCount %> reviews</small>
+          </div>
+        </div>
+        <p><%= listing.description %></p>
+      </section>
+
+      <section class="detail-block amenities-block">
+        <h2>Amenities</h2>
+        <% if(listing.amenities && listing.amenities.length){ %>
+          <div class="amenity-list">
+            <% listing.amenities.forEach((amenity) => { %>
+              <span><i class="fa-solid fa-check"></i> <%= amenity %></span>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted">No amenities added yet.</p>
+        <% } %>
+      </section>
+
+      <section class="detail-block rules-block">
+        <h2>House rules</h2>
+        <p><%= listing.houseRules %></p>
+      </section>
+
+      <section class="detail-block map-block">
+        <h2>Where you'll be</h2>
+        <div id="map" data-map-token="<%= mapToken %>" data-lng="<%= mapCoordinates[0] || '' %>" data-lat="<%= mapCoordinates[1] || '' %>" data-location="<%= listing.location %>"></div>
+      </section>
+
+      <section class="detail-block reviews-block">
+        <div class="section-title-row">
+          <h2>Reviews</h2>
+          <form action="/listings/<%= listing._id %>" method="GET">
+            <select name="reviewSort" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="newest" <%= reviewSort === 'newest' ? 'selected' : '' %>>Newest</option>
+              <option value="highest" <%= reviewSort === 'highest' ? 'selected' : '' %>>Highest</option>
+              <option value="lowest" <%= reviewSort === 'lowest' ? 'selected' : '' %>>Lowest</option>
+            </select>
+          </form>
+        </div>
+
+        <% if(currentUser && !isOwner){ %>
+          <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation review-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label class="form-label">Rating</label>
+            <fieldset class="starability-slot">
+              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating.">
+              <% for(let i = 1; i <= 5; i++) { %>
+                <input type="radio" id="rate-<%= i %>" name="review[rating]" value="<%= i %>">
+                <label for="rate-<%= i %>" title="<%= i %> stars"><%= i %> stars</label>
+              <% } %>
+            </fieldset>
+            <label for="comment" class="form-label">Comment</label>
+            <textarea name="review[comment]" id="comment" rows="4" class="form-control" required maxlength="1200"></textarea>
+            <div class="invalid-feedback">Please add a comment.</div>
+            <button class="btn btn-outline-dark mt-3" type="submit">Submit review</button>
+          </form>
+        <% } %>
+
+        <% if(sortedReviews.length){ %>
+          <div class="review-grid">
+            <% sortedReviews.forEach((review) => { %>
+              <% const reviewAuthorId = review.author && (review.author._id || review.author); %>
+              <article class="review-card">
+                <div class="review-card-top">
+                  <h3>@<%= review.author && review.author.username ? review.author.username : "Deleted user" %></h3>
+                  <p class="starability-result" data-rating="<%= review.rating %>"></p>
+                </div>
+                <p><%= review.comment %></p>
+                <% if(currentUser && sameId(reviewAuthorId, currentUser._id)){ %>
+                  <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-sm btn-light" type="submit" data-confirm="Delete this review?">Delete</button>
+                  </form>
+                <% } else if(currentUser) { %>
+                  <form method="POST" action="/reports">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="report[targetType]" value="review">
+                    <input type="hidden" name="report[targetId]" value="<%= review._id %>">
+                    <input type="hidden" name="report[reason]" value="Review reported by user">
+                    <button class="btn btn-sm btn-light" type="submit">Report</button>
+                  </form>
+                <% } %>
+              </article>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted">No reviews yet.</p>
+        <% } %>
+      </section>
+    </div>
+
+    <aside class="booking-panel">
+      <div class="price-panel">
+        <h2>Rs. <%= listing.price.toLocaleString("en-IN") %> <span>night</span></h2>
+        <% if(currentUser && !isOwner){ %>
+          <form action="/listings/<%= listing._id %>/bookings" method="POST" class="needs-validation" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label for="checkIn" class="form-label">Check in</label>
+            <input id="checkIn" name="booking[checkIn]" type="date" class="form-control" required>
+            <label for="checkOut" class="form-label mt-2">Check out</label>
+            <input id="checkOut" name="booking[checkOut]" type="date" class="form-control" required>
+            <button class="btn btn-brand w-100 mt-3" type="submit">Request booking</button>
+          </form>
+        <% } else if(!currentUser){ %>
+          <a class="btn btn-brand w-100" href="/login">Log in to request</a>
+        <% } else { %>
+          <p class="text-muted mb-0">This is your listing.</p>
+        <% } %>
+      </div>
+
+      <% if(currentUser && !isOwner){ %>
+        <div class="price-panel mt-3">
+          <h2>Ask the host</h2>
+          <form action="/listings/<%= listing._id %>/messages" method="POST" class="needs-validation" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <textarea name="message[body]" class="form-control" rows="4" maxlength="1200" placeholder="Ask about availability, amenities, or nearby places." required></textarea>
+            <button class="btn btn-outline-dark w-100 mt-3" type="submit">Send question</button>
+          </form>
+        </div>
+      <% } %>
+
+      <% if(isOwner){ %>
+        <div class="price-panel mt-3">
+          <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-outline-danger w-100" type="submit" data-confirm="Delete this listing and all related data?">Delete listing</button>
+          </form>
+        </div>
+      <% } else if(currentUser) { %>
+        <div class="price-panel mt-3">
+          <form action="/reports" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="report[targetType]" value="listing">
+            <input type="hidden" name="report[targetId]" value="<%= listing._id %>">
+            <input type="hidden" name="report[reason]" value="Listing reported by user">
+            <button class="btn btn-light w-100" type="submit">Report listing</button>
+          </form>
+        </div>
+      <% } %>
+    </aside>
+  </section>
+</article>

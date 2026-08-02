@@ -1,0 +1,45 @@
+<% const navCurrUser = typeof currUser === "undefined" ? null : currUser; %>
+
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top app-navbar">
+  <div class="container-fluid px-3 px-lg-4">
+    <a class="navbar-brand brand-mark" href="/listings" aria-label="WanderLust home">
+      <i class="fa-solid fa-compass"></i>
+      <span>WanderLust</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse gap-lg-3" id="mainNavbar">
+      <form class="nav-search mx-lg-auto my-3 my-lg-0" action="/listings" method="GET">
+        <label class="visually-hidden" for="nav-q">Search destinations</label>
+        <input id="nav-q" type="search" name="q" class="form-control" placeholder="Search destinations" value="<%= typeof filters !== 'undefined' ? filters.q : '' %>">
+        <button class="btn btn-brand" type="submit">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Search</span>
+        </button>
+      </form>
+
+      <div class="navbar-nav align-items-lg-center gap-1">
+        <a class="nav-link <%= currentPath === '/listings' ? 'active' : '' %>" href="/listings">Explore</a>
+        <% if(navCurrUser){ %>
+          <a class="nav-link" href="/wishlists">Wishlist</a>
+          <a class="nav-link" href="/bookings">Trips</a>
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        <% } %>
+        <a class="btn btn-outline-dark btn-sm ms-lg-2" href="/listings/new">Host</a>
+
+        <% if(!navCurrUser){ %>
+          <a class="nav-link" href="/signup">Sign up</a>
+          <a class="btn btn-dark btn-sm" href="/login">Log in</a>
+        <% } else { %>
+          <form action="/logout" method="POST" class="d-inline">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-light btn-sm" type="submit">Logout</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

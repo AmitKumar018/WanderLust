@@ -1,0 +1,121 @@
+<% layout("/layouts/boilerplate") %>
+<%
+  const activeFilters = Object.entries(filters || {}).filter(([key, value]) => {
+    if (!value) return false;
+    return key !== "sort" || value !== "recommended";
+  });
+  const buildUrl = (overrides = {}) => {
+    const params = new URLSearchParams();
+    Object.entries({ ...filters, ...overrides }).forEach(([key, value]) => {
+      if (key === "sort" && value === "recommended") return;
+      if (value && key !== "page") params.set(key, value);
+    });
+    if (overrides.page && overrides.page > 1) params.set("page", overrides.page);
+    const query = params.toString();
+    return query ? `/listings?${query}` : "/listings";
+  };
+%>
+
+<section class="discover-header">
+  <div>
+    <p class="eyebrow">Explore stays</p>
+    <h1>Find a place that fits the trip.</h1>
+    <p class="text-muted mb-0"><%= totalListings %> stays available</p>
+  </div>
+  <a class="btn btn-dark" href="/listings/new">List your place</a>
+</section>
+
+<section class="filters-band">
+  <form class="advanced-filters" action="/listings" method="GET">
+    <input type="hidden" name="q" value="<%= filters.q %>">
+    <input type="hidden" name="category" value="<%= filters.category %>">
+
+    <div>
+      <label for="minPrice" class="form-label">Min price</label>
+      <input id="minPrice" name="minPrice" type="number" min="0" class="form-control" value="<%= filters.minPrice %>">
+    </div>
+    <div>
+      <label for="maxPrice" class="form-label">Max price</label>
+      <input id="maxPrice" name="maxPrice" type="number" min="0" class="form-control" value="<%= filters.maxPrice %>">
+    </div>
+    <div>
+      <label for="sort" class="form-label">Sort</label>
+      <select id="sort" name="sort" class="form-select">
+        <option value="recommended" <%= filters.sort === 'recommended' ? 'selected' : '' %>>Recommended</option>
+        <option value="price-asc" <%= filters.sort === 'price-asc' ? 'selected' : '' %>>Price low to high</option>
+        <option value="price-desc" <%= filters.sort === 'price-desc' ? 'selected' : '' %>>Price high to low</option>
+        <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest</option>
+        <option value="rating" <%= filters.sort === 'rating' ? 'selected' : '' %>>Highest rated</option>
+      </select>
+    </div>
+    <button class="btn btn-brand" type="submit">Apply</button>
+    <% if(activeFilters.length){ %>
+      <a class="btn btn-light" href="/listings">Clear</a>
+    <% } %>
+  </form>
+
+  <div class="category-scroll">
+    <a class="category-pill <%= !filters.category ? 'active' : '' %>" href="/listings">
+      <i class="fa-solid fa-border-all"></i>
+      <span>All</span>
+    </a>
+    <% categories.forEach((category) => { %>
+      <a class="category-pill <%= filters.category === category.value ? 'active' : '' %>" href="<%= buildUrl({ category: category.value, page: 1 }) %>">
+        <i class="fa-solid <%= category.icon %>"></i>
+        <span><%= category.label %></span>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<% if(!allListings.length){ %>
+  <section class="empty-state">
+    <p class="eyebrow">No matches</p>
+    <h2>Try changing your filters.</h2>
+    <a class="btn btn-brand" href="/listings">Reset search</a>
+  </section>
+<% } else { %>
+  <section class="listing-grid">
+    <% allListings.forEach((listing) => { %>
+      <% const primaryImage = listing.images && listing.images.length ? listing.images[0] : listing.image; %>
+      <article class="listing-tile">
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+          <div class="listing-image-wrap">
+            <img src="<%= primaryImage && primaryImage.url ? primaryImage.url : 'https://via.placeholder.com/800x600?text=No+Image' %>" alt="<%= listing.title %>">
+            <% if(listing.isGuestFavorite){ %>
+              <span class="badge text-bg-light favorite-badge">Guest favorite</span>
+            <% } %>
+          </div>
+          <div class="listing-meta">
+            <div>
+              <h2><%= listing.title %></h2>
+              <p><%= listing.location %>, <%= listing.country %></p>
+            </div>
+            <div class="rating-mini">
+              <i class="fa-solid fa-star"></i>
+              <span><%= listing.averageRating ? listing.averageRating.toFixed(1) : "New" %></span>
+            </div>
+          </div>
+          <p class="price-line">Rs. <%= listing.price.toLocaleString("en-IN") %> night</p>
+          <p class="text-muted small"><%= listing.bedrooms || 1 %> bedrooms | <%= listing.bathrooms || 1 %> baths</p>
+        </a>
+      </article>
+    <% }) %>
+  </section>
+
+  <nav class="pagination-wrap" aria-label="Listings pagination">
+    <ul class="pagination">
+      <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= buildUrl({ page: currentPage - 1 }) %>">Prev</a>
+      </li>
+      <% for(let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="<%= buildUrl({ page: i }) %>"><%= i %></a>
+        </li>
+      <% } %>
+      <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= buildUrl({ page: currentPage + 1 }) %>">Next</a>
+      </li>
+    </ul>
+  </nav>
+<% } %>

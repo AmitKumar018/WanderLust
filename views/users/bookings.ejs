@@ -1,0 +1,34 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="dashboard-header">
+  <div>
+    <p class="eyebrow">Trips</p>
+    <h1>Your bookings</h1>
+  </div>
+</section>
+
+<% if(bookings.length){ %>
+  <div class="stack-list">
+    <% bookings.forEach((booking) => { %>
+      <article class="stack-item">
+        <div>
+          <h2><%= booking.listing ? booking.listing.title : 'Deleted listing' %></h2>
+          <p><%= booking.checkIn.toDateString() %> to <%= booking.checkOut.toDateString() %></p>
+          <p class="small text-muted">Status: <%= booking.status %> · Total: Rs. <%= booking.totalPrice.toLocaleString("en-IN") %></p>
+        </div>
+        <% if(booking.status === 'pending' || booking.status === 'approved'){ %>
+          <form action="/bookings/<%= booking._id %>/cancel?_method=PATCH" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-sm btn-outline-danger" type="submit" data-confirm="Cancel this booking?">Cancel</button>
+          </form>
+        <% } %>
+      </article>
+    <% }) %>
+  </div>
+<% } else { %>
+  <section class="empty-state">
+    <p class="eyebrow">No trips yet</p>
+    <h2>Request a booking to start planning.</h2>
+    <a class="btn btn-brand" href="/listings">Explore stays</a>
+  </section>
+<% } %>

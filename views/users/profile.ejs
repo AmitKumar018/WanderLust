@@ -1,0 +1,32 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="profile-header">
+  <div class="profile-avatar"><%= profileUser.username.slice(0, 1).toUpperCase() %></div>
+  <div>
+    <p class="eyebrow">Profile</p>
+    <h1><%= profileUser.username %></h1>
+    <p class="text-muted">Joined <%= profileUser.createdAt ? profileUser.createdAt.getFullYear() : 'recently' %> · <%= profileUser.isEmailVerified ? 'Email verified' : 'Email verification pending' %></p>
+  </div>
+</section>
+
+<section class="detail-block">
+  <h2>Hosted listings</h2>
+  <% if(hostedListings.length){ %>
+    <div class="listing-grid compact">
+      <% hostedListings.forEach((listing) => { %>
+        <% const primaryImage = listing.images && listing.images.length ? listing.images[0] : listing.image; %>
+        <article class="listing-tile">
+          <a href="/listings/<%= listing._id %>" class="listing-link">
+            <div class="listing-image-wrap">
+              <img src="<%= primaryImage && primaryImage.url ? primaryImage.url : 'https://via.placeholder.com/800x600?text=No+Image' %>" alt="<%= listing.title %>">
+            </div>
+            <h2><%= listing.title %></h2>
+            <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+          </a>
+        </article>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="text-muted">No active hosted listings yet.</p>
+  <% } %>
+</section>

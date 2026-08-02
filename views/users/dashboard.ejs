@@ -1,0 +1,127 @@
+<% layout("/layouts/boilerplate") %>
+<% const sameId = (left, right) => left && right && left.toString() === right.toString(); %>
+
+<section class="dashboard-header">
+  <div>
+    <p class="eyebrow">Host dashboard</p>
+    <h1>Welcome, <%= currUser.username %></h1>
+  </div>
+  <a class="btn btn-brand" href="/listings/new">Create listing</a>
+</section>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <span>Listings</span>
+    <strong><%= myListings.length %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Booking requests</span>
+    <strong><%= hostBookings.filter((booking) => booking.status === 'pending').length %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Approved earnings</span>
+    <strong>Rs. <%= estimatedEarnings.toLocaleString("en-IN") %></strong>
+  </div>
+</section>
+
+<section class="dashboard-grid">
+  <div class="dashboard-panel">
+    <div class="section-title-row">
+      <h2>My listings</h2>
+      <a href="/listings/new">Add new</a>
+    </div>
+    <% if(myListings.length){ %>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>Status</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% myListings.forEach((listing) => { %>
+              <tr>
+                <td><a href="/listings/<%= listing._id %>"><%= listing.title %></a></td>
+                <td><span class="badge <%= listing.isActive ? 'text-bg-success' : 'text-bg-warning' %>"><%= listing.isActive ? 'Active' : 'Inactive' %></span></td>
+                <td><%= listing.averageRating ? listing.averageRating.toFixed(1) : 'New' %></td>
+                <td class="table-actions">
+                  <a class="btn btn-sm btn-light" href="/listings/<%= listing._id %>/edit">Edit</a>
+                  <form action="/listings/<%= listing._id %>/status?_method=PATCH" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-sm btn-outline-dark" type="submit" data-confirm="Change this listing status?"><%= listing.isActive ? 'Deactivate' : 'Activate' %></button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-muted">You have not created a listing yet.</p>
+    <% } %>
+  </div>
+
+  <div class="dashboard-panel">
+    <h2>Booking requests</h2>
+    <% if(hostBookings.length){ %>
+      <div class="stack-list">
+        <% hostBookings.forEach((booking) => { %>
+          <article class="stack-item">
+            <div>
+              <h3><%= booking.listing ? booking.listing.title : 'Deleted listing' %></h3>
+              <p><%= booking.guest ? booking.guest.username : 'Guest' %> · <%= booking.status %></p>
+              <p class="small text-muted"><%= booking.checkIn.toDateString() %> to <%= booking.checkOut.toDateString() %> · Rs. <%= booking.totalPrice.toLocaleString("en-IN") %></p>
+            </div>
+            <% if(booking.status === 'pending'){ %>
+              <div class="table-actions">
+                <form action="/bookings/<%= booking._id %>/approve?_method=PATCH" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-sm btn-success" type="submit">Approve</button>
+                </form>
+                <form action="/bookings/<%= booking._id %>/reject?_method=PATCH" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" data-confirm="Reject this booking request?">Reject</button>
+                </form>
+              </div>
+            <% } %>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted">No booking requests yet.</p>
+    <% } %>
+  </div>
+</section>
+
+<section class="dashboard-panel" id="messages">
+  <h2>Messages</h2>
+  <% const allThreads = [...hostThreads, ...guestThreads]; %>
+  <% if(allThreads.length){ %>
+    <div class="message-grid">
+      <% allThreads.forEach((thread) => { %>
+        <% const lastMessage = thread.messages[thread.messages.length - 1]; %>
+        <% const isCurrentUserHost = sameId(thread.host && (thread.host._id || thread.host), currUser._id); %>
+        <% const otherUser = isCurrentUserHost ? thread.guest : thread.host; %>
+        <article class="message-card">
+          <h3><%= thread.listing ? thread.listing.title : 'Listing' %></h3>
+          <p class="text-muted">
+            With <%= otherUser && otherUser.username ? otherUser.username : "WanderLust user" %>
+          </p>
+          <% if(lastMessage){ %>
+            <p><%= lastMessage.body %></p>
+          <% } %>
+          <form action="/messages/<%= thread._id %>/reply" method="POST" class="needs-validation" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <textarea name="message[body]" class="form-control" rows="3" required maxlength="1200" placeholder="Write a reply"></textarea>
+            <button class="btn btn-sm btn-brand mt-2" type="submit">Reply</button>
+          </form>
+        </article>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="text-muted">No messages yet.</p>
+  <% } %>
+</section>

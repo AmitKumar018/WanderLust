@@ -1,0 +1,7 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="empty-state">
+  <p class="eyebrow"><%= statusCode || 500 %></p>
+  <h1><%= message %></h1>
+  <a class="btn btn-brand" href="/listings">Back to listings</a>
+</section>

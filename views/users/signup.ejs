@@ -1,0 +1,32 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="auth-page">
+  <div class="form-heading">
+    <p class="eyebrow">Start exploring</p>
+    <h1>Create your account</h1>
+  </div>
+
+  <form action="/signup" method="POST" class="needs-validation auth-form" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="mb-3">
+      <label for="username" class="form-label">Username</label>
+      <input type="text" id="username" name="username" class="form-control" required autocomplete="username">
+      <div class="invalid-feedback">Please choose a username.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" id="email" name="email" class="form-control" required autocomplete="email">
+      <div class="invalid-feedback">Please enter a valid email.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <input type="password" id="password" name="password" class="form-control" required autocomplete="new-password">
+      <div class="invalid-feedback">Please enter a password.</div>
+    </div>
+
+    <button class="btn btn-brand w-100" type="submit">Sign up</button>
+    <p class="text-muted mt-3 mb-0">Already have an account? <a href="/login">Log in</a></p>
+  </form>
+</section>

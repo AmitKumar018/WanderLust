@@ -1,0 +1,18 @@
+<%
+  const flashSuccess = typeof success === "undefined" ? [] : success;
+  const flashError = typeof error === "undefined" ? [] : error;
+%>
+
+<% if(flashSuccess && flashSuccess.length){ %>
+  <div class="alert alert-success alert-dismissible fade show app-alert" role="alert">
+    <%= flashSuccess.join ? flashSuccess.join(" ") : flashSuccess %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<% if(flashError && flashError.length){ %>
+  <div class="alert alert-danger alert-dismissible fade show app-alert" role="alert">
+    <%= flashError.join ? flashError.join(" ") : flashError %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
